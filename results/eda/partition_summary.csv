@@ -1,0 +1,3 @@
+partition,trips,points,median_points,median_arcs,max_arcs,route_arcs
+student_test,10,19160,1420.0,13145.0,56027,3477
+train,80,208417,1529.0,19526.5,307392,31336

@@ -1,0 +1,8 @@
+train rows 918003 (pos rate 0.146) from 80 trips; student_test rows 105283
+
+=== rf (Bagging ensemble) : 200 trees, min_samples_leaf=5, sqrt features, 400k-row subsample
+  fold 0: F1m 0.9446 top1 0.9079 logloss 0.0658 fit 86.7s
+  fold 1: F1m 0.9255 top1 0.8801 logloss 0.0974 fit 70.1s
+  fold 2: F1m 0.9577 top1 0.9368 logloss 0.0522 fit 65.2s
+  fold 3: F1m 0.9772 top1 0.9691 logloss 0.0344 fit 78.3s
+  fold 4: F1m 0.9148 top1 0.8638 logloss 0.1147 fit 61.1s
