@@ -73,6 +73,17 @@ const $ = id => document.getElementById(id);
 const api = () => $('api').value.replace(/\/+$/, '');
 const pct = x => (x == null ? '—' : (100 * x).toFixed(2) + '%');
 
+// optional deep link: index.html?api=http://host:8000&trip=00000015
+const params = new URLSearchParams(location.search);
+if (params.get('api')) $('api').value = params.get('api');
+window.addEventListener('load', async () => {
+  if (!params.get('api')) return;
+  await $('connect').onclick();
+  const t = params.get('trip');
+  const b = [...document.querySelectorAll('.trip')].find(x => x.textContent === t);
+  if (b) run(t, b);
+});
+
 $('connect').onclick = async () => {
   $('status').textContent = 'Connecting…';
   try {
