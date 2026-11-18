@@ -67,44 +67,18 @@ def trip_stats(part, trip):
 
 
 def folium_map(part, tid, path):
-    import folium
+    from pathsnap import viz
     trip = load_trip(os.path.join(ROOT, "data", part, tid))
-    c = [trip.track[:, 1].mean(), trip.track[:, 0].mean()]
-    m = folium.Map(location=c, zoom_start=14, tiles="OpenStreetMap")
-    # road arcs whose midpoint lies within 100 m of any GPS fix
-    from scipy.spatial import cKDTree
-    mid = (trip.node_xy[trip.arcs[:, 0]] + trip.node_xy[trip.arcs[:, 1]]) / 2
-    dmid, _ = cKDTree(trip.xy).query(mid, distance_upper_bound=100)
-    near = np.flatnonzero(np.isfinite(dmid))
-    net = folium.FeatureGroup("Road network (arcs within 100 m of GPS)")
-    for a in near:
-        u, v = trip.arcs[a]
-        folium.PolyLine([[trip.nodes[u, 1], trip.nodes[u, 0]], [trip.nodes[v, 1], trip.nodes[v, 0]]],
-                        color="#9a9a9a", weight=1, opacity=0.6).add_to(net)
-    net.add_to(m)
+    m = viz.base_map(trip)
+    viz.add_network(m, trip)
+    viz.add_gps(m, trip)
     if trip.route is not None:
-        coords = [[trip.nodes[trip.arcs[trip.route[0], 0], 1], trip.nodes[trip.arcs[trip.route[0], 0], 0]]]
-        coords += [[trip.nodes[trip.arcs[a, 1], 1], trip.nodes[trip.arcs[a, 1], 0]] for a in trip.route]
-        folium.PolyLine(coords, color="green", weight=5, opacity=0.8, tooltip="Reference route").add_to(
-            folium.FeatureGroup("Reference route").add_to(m))
-    gps = folium.FeatureGroup("Raw GPS observations")
-    for lon, lat, t in trip.track[:: max(1, len(trip.track) // 1500)]:
-        folium.CircleMarker([lat, lon], radius=2, color="blue", fill=True, opacity=0.7, tooltip=f"t={t:.0f}s").add_to(gps)
-    gps.add_to(m)
-    se = folium.FeatureGroup("Start / end")
-    folium.Marker([trip.track[0, 1], trip.track[0, 0]], tooltip="GPS start", icon=folium.Icon(color="green", icon="play")).add_to(se)
-    folium.Marker([trip.track[-1, 1], trip.track[-1, 0]], tooltip="GPS end", icon=folium.Icon(color="red", icon="stop")).add_to(se)
-    se.add_to(m)
-    legend = (f'<div style="position:fixed;bottom:30px;left:30px;z-index:9999;background:white;padding:8px 12px;'
-              f'border:1px solid #888;border-radius:6px;font-size:13px">'
-              f'<b>Trip {tid} ({part})</b><br>'
-              f'<span style="color:blue">&#9679;</span> Raw GPS observations<br>'
-              f'<span style="color:green">&#9644;</span> Reference route<br>'
-              f'<span style="color:#9a9a9a">&#9644;</span> Road network (nearby)</div>')
-    m.get_root().html.add_child(folium.Element(legend))
-    folium.LayerControl(collapsed=False).add_to(m)
-    m.fit_bounds([[trip.track[:, 1].min(), trip.track[:, 0].min()], [trip.track[:, 1].max(), trip.track[:, 0].max()]])
-    m.save(path)
+        viz.add_route(m, trip, trip.route, "Reference route", "#1a9850", weight=5)
+    viz.add_start_end(m, trip)
+    viz.add_legend(m, f"Trip {tid} ({part})", [("Raw GPS observations", "#1f4fd1"),
+                   ("Reference route", "#1a9850"), ("Road network (nearby)", "#8c8c8c")])
+    viz.finish(m, path)
+
 
 
 def main():

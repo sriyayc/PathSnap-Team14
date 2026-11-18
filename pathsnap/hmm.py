@@ -28,6 +28,7 @@ class HMMConfig:
     route_slack: float = 300.0
     gap_reset_s: float = 120.0
     min_prob: float = 1e-4
+    backward_factor: float = 3.0    # cost multiplier for backward movement along a directed arc
 
 
 def viterbi(net, xy, ts, cand_arcs, cand_t, cand_p, cfg: HMMConfig = HMMConfig()):
@@ -36,6 +37,7 @@ def viterbi(net, xy, ts, cand_arcs, cand_t, cand_p, cfg: HMMConfig = HMMConfig()
     n = len(xy)
     pred = np.full(n, -1, dtype=np.int64)
     diag = {"unreachable_steps": 0, "resets": 0}
+    net.backward_factor = cfg.backward_factor
 
     def log_emis(p):
         p = np.clip(p, cfg.min_prob, 1.0)

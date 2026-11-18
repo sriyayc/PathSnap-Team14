@@ -56,14 +56,20 @@ def to_local_xy(lon, lat, lon0, lat0):
     return np.column_stack([x, y])
 
 
-def load_trip(folder: str, trip_id: str | None = None) -> Trip:
+def load_route(folder: str, trip_id: str | None = None):
+    trip_id = trip_id or os.path.basename(os.path.normpath(folder))
+    r = _read(os.path.join(folder, f"{trip_id}.route"), 1, dtype=np.int64)
+    return r[:, 0] if r is not None else None
+
+
+def load_trip(folder: str, trip_id: str | None = None, include_route: bool = True) -> Trip:
+    """include_route=False is used by the prediction pipeline so the reference never reaches it."""
     trip_id = trip_id or os.path.basename(os.path.normpath(folder))
     p = lambda ext: os.path.join(folder, f"{trip_id}.{ext}")
     track = _read(p("track"), 3)
     nodes = _read(p("nodes"), 2)
     arcs = _read(p("arcs"), 2, dtype=np.int64)
-    route = _read(p("route"), 1, dtype=np.int64)
-    route = route[:, 0] if route is not None else None
+    route = load_route(folder, trip_id) if include_route else None
 
     info = {"raw_points": len(track)}
     # --- cleaning --------------------------------------------------------

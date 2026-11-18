@@ -55,7 +55,9 @@ class RoadNetwork:
         self._adj_ptr = np.searchsorted(arcs[order, 0], np.arange(n_nodes + 1))
         self._adj_to = arcs[order, 1]
         self._adj_len = self.length[order]
-        self._sp_cache: dict[tuple[int, float], dict[int, float]] = {}
+        self._adj_order = order  # position in adjacency -> original arc id
+        self._sp_cache: dict[int, tuple[float, dict[int, float]]] = {}
+        self.backward_factor = 3.0
 
     # ------------------------------------------------------------------
     def candidates(self, xy: np.ndarray, radius: float, k: int):
@@ -79,11 +81,13 @@ class RoadNetwork:
 
     # ------------------------------------------------------------------
     def dist_from(self, src: int, limit: float) -> dict[int, float]:
-        """Bounded Dijkstra from node `src`, exploring up to `limit` metres. Cached."""
-        key = (src, limit)
-        c = self._sp_cache.get(key)
-        if c is not None:
-            return c
+        """Bounded Dijkstra from node `src`, exploring up to `limit` metres. Cached; the limit is
+        rounded up to a 500 m bucket and any cached search with a larger limit is reused."""
+        limit = float(np.ceil(limit / 500.0) * 500.0)
+        c = self._sp_cache.get(src)
+        if c is not None and c[0] >= limit:
+            return c[1]
+        key = src
         dist = {src: 0.0}
         pq = [(0.0, src)]
         ptr, to, ln = self._adj_ptr, self._adj_to, self._adj_len
@@ -96,7 +100,7 @@ class RoadNetwork:
                 if nd <= limit and nd < dist.get(v, np.inf):
                     dist[v] = nd
                     heapq.heappush(pq, (nd, v))
-        self._sp_cache[key] = dist
+        self._sp_cache[key] = (limit, dist)
         return dist
 
     def route_distance(self, a: int, ta: float, b: int, tb: float, limit: float) -> float:
@@ -105,14 +109,45 @@ class RoadNetwork:
         if a == b:
             if tb >= ta:
                 return (tb - ta) * self.length[a]
-            # small backwards jitter on the same arc is tolerated as a short move
+            # Moving backwards along a directed arc is impossible for a car; it is what happens when
+            # the decoder sits on the wrong-direction twin. Small backward jitter is tolerated but costed
+            # `backward_factor` times its length so wrong-direction paths are penalised.
             back = (ta - tb) * self.length[a]
-            return back if back < 15.0 else np.inf
+            return back * self.backward_factor if back < 30.0 else np.inf
         rest = (1 - ta) * self.length[a]
         d = self.dist_from(int(self.arcs[a, 1]), limit).get(int(self.arcs[b, 0]))
-        if d is None:
+        if d is None or d > limit:
             return np.inf
         return rest + d + tb * self.length[b]
+
+    def shortest_arc_path(self, src: int, dst: int, limit: float = 3000.0):
+        """Arc ids of the shortest path from node src to node dst (None if beyond limit)."""
+        if src == dst:
+            return []
+        dist, parent = {src: 0.0}, {}
+        pq = [(0.0, src)]
+        ptr, to, ln = self._adj_ptr, self._adj_to, self._adj_len
+        order = self._adj_order
+        while pq:
+            d, u = heapq.heappop(pq)
+            if u == dst:
+                break
+            if d > dist.get(u, np.inf) or d > limit:
+                continue
+            for e in range(ptr[u], ptr[u + 1]):
+                v, nd = int(to[e]), d + ln[e]
+                if nd <= limit and nd < dist.get(v, np.inf):
+                    dist[v] = nd
+                    parent[v] = (u, int(order[e]))
+                    heapq.heappush(pq, (nd, v))
+        if dst not in parent:
+            return None
+        path, v = [], dst
+        while v != src:
+            u, a = parent[v]
+            path.append(a)
+            v = u
+        return path[::-1]
 
     def connected(self, a: int, b: int) -> bool:
         return a == b or self.arcs[a, 1] == self.arcs[b, 0]
