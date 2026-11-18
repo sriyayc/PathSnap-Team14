@@ -1,0 +1,8 @@
+data/train/
+data/student_test/
+data/eval/
+data/processed/
+__pycache__/
+*.pyc
+.venv/
+.ipynb_checkpoints/
