@@ -1,0 +1,12 @@
+{
+  "model": "lgbm_tuned",
+  "partition": "eval",
+  "clf_top1_all_pointweighted": 0.8552001629825813,
+  "hmm_top1_all_pointweighted": 0.9528878476112865,
+  "clf_top1_all_trip_mean": 0.9040697593533261,
+  "hmm_top1_all_trip_mean": 0.9596428861615616,
+  "hmm_top1_decoded_trip_mean": 0.9661827902317572,
+  "route_f1_mean": 0.991132711257723,
+  "route_continuity_mean": 1.0,
+  "mean_time_s": 3.559894539997913
+}
