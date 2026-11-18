@@ -1,0 +1,6 @@
+{'model': 'logreg', 'train_f1_macro': 0.9217449157167876, 'train_top1': 0.8962271193526232, 'train_log_loss': 0.11557039732204984}
+{'model': 'knn', 'train_f1_macro': 0.9376486799174049, 'train_top1': 0.9150541969004747, 'train_log_loss': 0.10286475617835848}
+{'model': 'rf', 'train_f1_macro': 0.9572125704506198, 'train_top1': 0.9336722505897459, 'train_log_loss': 0.05592685291677534}
+{'model': 'lgbm', 'train_f1_macro': 0.9542415047879116, 'train_top1': 0.9292976798351698, 'train_log_loss': 0.05667328338273226}
+{'model': 'mlp', 'train_f1_macro': 0.9433046019338869, 'train_top1': 0.9118217922302846, 'train_log_loss': 0.0729476204954999}
+{'model': 'lgbm_tuned', 'train_f1_macro': 0.9636153042275248, 'train_top1': 0.9443473976529607, 'train_log_loss': 0.046240583269430716}
