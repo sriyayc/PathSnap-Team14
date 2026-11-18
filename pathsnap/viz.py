@@ -1,7 +1,7 @@
 """Folium helpers shared by the EDA maps, prediction maps and report figures.
 
-OpenStreetMap's own tile servers refuse requests from local HTML files (HTTP 403), so the
-base layers are CartoDB Positron and Esri World Street Map, which serve local files fine.
+OpenStreetMap's tile servers refuse requests from local HTML files (HTTP 403) and CartoDB now requires an
+API key, so the base layers are Esri World Street Map and Esri Light Gray, which need neither.
 """
 from __future__ import annotations
 
@@ -9,14 +9,14 @@ import folium
 import numpy as np
 from scipy.spatial import cKDTree
 
-CARTO = "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
+ESRI_GRAY = "https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}"
 ESRI = "https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}"
 
 
 def base_map(trip):
     m = folium.Map(location=[trip.track[:, 1].mean(), trip.track[:, 0].mean()], zoom_start=14, tiles=None)
-    folium.TileLayer(CARTO, attr="&copy; OpenStreetMap contributors &copy; CARTO", name="CartoDB light").add_to(m)
-    folium.TileLayer(ESRI, attr="Tiles &copy; Esri", name="Esri streets").add_to(m)
+    folium.TileLayer(ESRI, attr="Tiles &copy; Esri", name="Esri streets", max_zoom=19).add_to(m)
+    folium.TileLayer(ESRI_GRAY, attr="Tiles &copy; Esri", name="Esri light gray", max_zoom=16).add_to(m)
     m.fit_bounds([[trip.track[:, 1].min(), trip.track[:, 0].min()], [trip.track[:, 1].max(), trip.track[:, 0].max()]])
     return m
 

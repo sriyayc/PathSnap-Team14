@@ -8,5 +8,5 @@
   "hmm_top1_decoded_trip_mean": 0.9556623610644965,
   "route_f1_mean": 0.9895818181091668,
   "route_continuity_mean": 0.998955704774532,
-  "mean_time_s": 5.051588789996458
+  "mean_time_s": 3.6348817399994005
 }

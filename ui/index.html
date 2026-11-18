@@ -51,10 +51,16 @@
 </main>
 <script>
 const map = L.map('map').setView([20, 0], 2);
-const carto = L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {attribution:'&copy; OpenStreetMap contributors &copy; CARTO'}).addTo(map);
-const esri = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', {attribution:'Tiles &copy; Esri'});
+// Esri needs no API key (CartoDB now returns "API key required" tiles)
+const esri = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', {attribution:'Tiles &copy; Esri', maxZoom:19}).addTo(map);
+const esriGray = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}', {attribution:'Tiles &copy; Esri', maxZoom:16});
+const osm = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {attribution:'&copy; OpenStreetMap contributors', maxZoom:19});
+// drawing order: GPS dots at the bottom, classifier-only above, HMM route on top
+map.createPane('gpsPane').style.zIndex = 410;
+map.createPane('clfPane').style.zIndex = 420;
+map.createPane('routePane').style.zIndex = 430;
 const gpsLayer = L.layerGroup().addTo(map), predLayer = L.layerGroup().addTo(map), clfLayer = L.layerGroup();
-L.control.layers({'CartoDB light':carto, 'Esri streets':esri},
+L.control.layers({'Esri streets':esri, 'Esri light gray':esriGray, 'OpenStreetMap':osm},
   {'Raw GPS':gpsLayer, 'Predicted route (classifier + HMM)':predLayer, 'Classifier-only (no HMM)':clfLayer}, {collapsed:false}).addTo(map);
 const legend = L.control({position:'bottomleft'});
 legend.onAdd = () => { const d = L.DomUtil.create('div','legend');
@@ -92,9 +98,12 @@ async function run(tid, btn) {
 
 function draw(d) {
   gpsLayer.clearLayers(); predLayer.clearLayers(); clfLayer.clearLayers();
-  d.gps.forEach(p => L.circleMarker(p, {radius:2.5, color:'#1f4fd1', weight:1, fillOpacity:.8}).addTo(gpsLayer));
-  d.classifier_only_route.forEach(l => L.polyline(l, {color:'#f39c12', weight:3, opacity:.8, dashArray:'4 4'}).addTo(clfLayer));
-  d.predicted_route.forEach(l => L.polyline(l, {color:'#d7301f', weight:5, opacity:.85}).addTo(predLayer));
+  d.gps.forEach(p => L.circleMarker(p, {pane:'gpsPane', radius:2, color:'#1f4fd1', weight:0, fillOpacity:.55}).addTo(gpsLayer));
+  d.classifier_only_route.forEach(l => L.polyline(l, {pane:'clfPane', color:'#f39c12', weight:3, opacity:.9, dashArray:'4 4'}).addTo(clfLayer));
+  d.predicted_route.forEach(l => {
+    L.polyline(l, {pane:'routePane', color:'#ffffff', weight:9, opacity:.9}).addTo(predLayer);   // white casing
+    L.polyline(l, {pane:'routePane', color:'#d7301f', weight:5, opacity:1}).addTo(predLayer);
+  });
   map.fitBounds(L.latLngBounds(d.gps), {padding:[20,20]});
 }
 
