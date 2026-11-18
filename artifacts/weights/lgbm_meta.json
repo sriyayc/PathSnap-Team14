@@ -52,6 +52,9 @@
   ],
   "num_trees": 400,
   "best_iteration": 0,
-  "load_example": "lgb.Booster(model_file='artifacts/weights/lgbm.txt')",
+  "load_example": {
+    "txt": "lgb.Booster(model_file='artifacts/weights/lgbm.txt')",
+    "pkl": "pickle.load(open('artifacts/weights/lgbm.pkl', 'rb'))"
+  },
   "note": "Binary: Booster.predict returns P(classes[1]). Multiclass: per-class probabilities in the order of 'classes'."
 }

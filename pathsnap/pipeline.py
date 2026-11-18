@@ -31,7 +31,10 @@ class Predictor:
         self.model_name = model_name
         self.model = joblib.load(path)
         hp = hmm_config_path or os.path.join(ROOT, "artifacts", "hmm_config.json")
-        self.hmm_cfg = HMMConfig(**json.load(open(hp))) if os.path.exists(hp) else HMMConfig()
+        self.hmm_cfg = HMMConfig()
+        if os.path.exists(hp):
+            with open(hp) as fh:
+                self.hmm_cfg = HMMConfig(**json.load(fh))
 
     def predict_trip(self, folder):
         t0 = time.perf_counter()

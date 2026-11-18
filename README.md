@@ -53,6 +53,10 @@ that `http://<Laptop-1-IPv4>:8000/health` opens in Laptop 2's browser.
 | `results/` | CSV/JSON experiment outputs, logs, plots |
 | `maps/` | Folium HTML maps |
 | `artifacts/models/` | Trained model files (joblib) |
+| `artifacts/weights/` | LightGBM weights: `.txt` (native LightGBM), `.pkl` (pickled classifier) and `_meta.json` (params, feature order) |
+| `scripts/08_train_fit.py` | In-sample metrics of each saved model (over/underfitting check) |
+| `scripts/09_zoom_map.py` | Close-up map where classifier-only and HMM predictions disagree most |
+| `scripts/10_export_lgbm_weights.py` | Exports the trained LightGBM models to `artifacts/weights/` |
 
 ## Setup
 
@@ -84,7 +88,23 @@ python scripts/05b_tune_hmm.py           # HMM decoder parameters on out-of-fold
 python scripts/05_hmm_eval.py --model lgbm_tuned --hmm_config artifacts/hmm_config.json   # classifier vs HMM
 python scripts/07_final_eval_and_maps.py # deployed pipeline on student_test + prediction maps
 python scripts/06_plots.py               # all charts
+python scripts/10_export_lgbm_weights.py --models lgbm_tuned lgbm   # weight files -> artifacts/weights
 ```
+
+## Trained weights
+
+`artifacts/weights/` holds the trained LightGBM models in two formats. Both reproduce the deployed
+model's probabilities exactly; the export script checks this every time it runs.
+
+```python
+import lightgbm as lgb, pickle
+booster = lgb.Booster(model_file="artifacts/weights/lgbm_tuned.txt")   # any LightGBM version/language
+p = booster.predict(X)                                                 # P(candidate is the reference arc)
+
+clf = pickle.load(open("artifacts/weights/lgbm_tuned.pkl", "rb"))      # scikit-learn LGBMClassifier
+p = clf.predict_proba(X)[:, 1]
+```
+`X` has the 20 feature columns in the order listed in `lgbm_tuned_meta.json` (`pathsnap.features.FEATURES`).
 
 ## Deployment (two laptops on the same network)
 

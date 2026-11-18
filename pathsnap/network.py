@@ -124,6 +124,26 @@ class RoadNetwork:
             return np.inf
         return rest + d + tb * self.length[b]
 
+    def route_distance_matrix(self, A, tA, B, tB, limit: float) -> np.ndarray:
+        """route_distance for every pair (A[a], B[b]); same semantics, one Dijkstra lookup per source arc."""
+        A = np.asarray(A, dtype=np.int64); B = np.asarray(B, dtype=np.int64)
+        tA = np.asarray(tA, dtype=float); tB = np.asarray(tB, dtype=float)
+        out = np.full((len(A), len(B)), np.inf)
+        b_from = self.arcs[B, 0]
+        b_tail = tB * self.length[B]
+        for a in range(len(A)):
+            arc = int(A[a])
+            dist = self.dist_from(int(self.arcs[arc, 1]), limit)
+            rest = (1 - tA[a]) * self.length[arc]
+            for b in range(len(B)):
+                if B[b] == arc:
+                    out[a, b] = self.route_distance(arc, float(tA[a]), arc, float(tB[b]), limit)
+                    continue
+                d = dist.get(int(b_from[b]))
+                if d is not None and d <= limit:
+                    out[a, b] = rest + d + b_tail[b]
+        return out
+
     def shortest_arc_path(self, src: int, dst: int, limit: float = 3000.0):
         """Arc ids of the shortest path from node src to node dst (None if beyond limit)."""
         if src == dst:

@@ -69,6 +69,9 @@ def load_trip(folder: str, trip_id: str | None = None, include_route: bool = Tru
     track = _read(p("track"), 3)
     nodes = _read(p("nodes"), 2)
     arcs = _read(p("arcs"), 2, dtype=np.int64)
+    for ext, arr in (("track", track), ("nodes", nodes), ("arcs", arcs)):
+        if arr is None:
+            raise FileNotFoundError(f"{trip_id}.{ext} is missing or empty")
     route = load_route(folder, trip_id) if include_route else None
 
     info = {"raw_points": len(track)}

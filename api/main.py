@@ -17,7 +17,6 @@ import os
 import sys
 import time
 
-import numpy as np
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
@@ -100,8 +99,13 @@ def predict(req: PredictRequest):
     t0 = time.perf_counter()
     folder = os.path.join(DATA_DIR, tid)
     log.info("POST /predict trip_id=%s  -> running pipeline", tid)
-    trip, res = predictor.predict_trip(folder)
-    metrics = score_against_reference(trip, folder, res)  # server-side only
+    try:
+        trip, res = predictor.predict_trip(folder)
+        metrics = score_against_reference(trip, folder, res)  # server-side only
+    except Exception as e:  # malformed / incomplete trip files
+        log.exception("trip_id=%s  pipeline failed", tid)
+        msg = str(e).replace(folder + os.sep, "")  # don't expose server paths
+        raise HTTPException(422, f"could not process trip {tid}: {type(e).__name__}: {msg}")
     elapsed = time.perf_counter() - t0
     if metrics:
         log.info("trip_id=%s  obs=%d  decoded=%d  Top-1(HMM)=%.4f  Top-1(classifier)=%.4f  route-F1=%.4f  "

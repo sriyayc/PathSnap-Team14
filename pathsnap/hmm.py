@@ -67,11 +67,9 @@ def viterbi(net, xy, ts, cand_arcs, cand_t, cand_p, cfg: HMMConfig = HMMConfig()
         limit = cfg.max_route_factor * d_gc + cfg.route_slack
         A, tA = cand_arcs[prev_i], cand_t[prev_i]
         B, tB = cand_arcs[i], cand_t[i]
-        logT = np.empty((len(A), len(B)))
-        for a in range(len(A)):
-            for b in range(len(B)):
-                dr = net.route_distance(int(A[a]), float(tA[a]), int(B[b]), float(tB[b]), limit)
-                logT[a, b] = -cfg.unreachable_penalty if not np.isfinite(dr) else -abs(dr - d_gc) / beta
+        dr = net.route_distance_matrix(A, tA, B, tB, limit)
+        with np.errstate(invalid="ignore"):
+            logT = np.where(np.isfinite(dr), -np.abs(dr - d_gc) / beta, -cfg.unreachable_penalty)
         tot = prev_score[:, None] + logT
         back = tot.argmax(0)
         score = tot[back, np.arange(len(B))] + e

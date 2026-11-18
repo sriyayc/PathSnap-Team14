@@ -20,7 +20,9 @@ P = Predictor("lgbm_tuned")
 trip, res = P.predict_trip(folder)
 keep, h, c = res["kept_idx"], res["pred_arcs_kept"], res["clf_arcs_kept"]
 A = trip.arcs
-diff = ~(A[h] == A[np.maximum(c, 0)]).all(1)
+# -1 = no prediction; compare only where both exist (A[-1] would silently pick the last arc)
+valid = (h >= 0) & (c >= 0)
+diff = valid & ~(A[np.maximum(h, 0)] == A[np.maximum(c, 0)]).all(1)
 win = 60
 score = np.convolve(diff.astype(float), np.ones(win), "same")
 centre = int(np.argmax(score))
