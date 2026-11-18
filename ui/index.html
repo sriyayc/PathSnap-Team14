@@ -74,6 +74,8 @@
   @keyframes spin { to { transform:rotate(360deg); } }
 
   #map { height:100%; background:#0b0f17; }
+  .dark-tiles { filter: invert(100%) hue-rotate(195deg) saturate(28%) brightness(92%) contrast(105%); }
+  .se-marker { width:14px; height:14px; border-radius:50%; border:3px solid #0b0f17; }
   .leaflet-container { font-family:Inter, system-ui, sans-serif; }
   .leaflet-control-layers, .legend { background:rgba(17,24,39,.92)!important; color:var(--ink)!important; border:1px solid var(--line)!important;
                                      border-radius:12px!important; box-shadow:0 8px 24px rgba(0,0,0,.4)!important; backdrop-filter:blur(6px); }
@@ -112,16 +114,20 @@
 const map = L.map('map', {zoomControl:true}).setView([20, 0], 2);
 // Esri basemaps need no API key (CartoDB now returns "API key required" tiles)
 const ESRI = 'https://server.arcgisonline.com/ArcGIS/rest/services/';
-const dark = L.tileLayer(ESRI + 'Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}', {attribution:'Tiles &copy; Esri', maxNativeZoom:16, maxZoom:19}).addTo(map);
-const darkLabels = L.tileLayer(ESRI + 'Canvas/World_Dark_Gray_Reference/MapServer/tile/{z}/{y}/{x}', {maxNativeZoom:16, maxZoom:19, pane:'overlayPane'});
-const sat = L.tileLayer(ESRI + 'World_Imagery/MapServer/tile/{z}/{y}/{x}', {attribution:'Tiles &copy; Esri', maxZoom:19});
+// "Dark detailed": the full-detail Esri street map, colour-inverted by CSS into a dark theme
+const dark = L.tileLayer(ESRI + 'World_Street_Map/MapServer/tile/{z}/{y}/{x}', {attribution:'Tiles &copy; Esri', maxZoom:19, className:'dark-tiles'}).addTo(map);
+const satImg = L.tileLayer(ESRI + 'World_Imagery/MapServer/tile/{z}/{y}/{x}', {attribution:'Tiles &copy; Esri', maxZoom:19});
+const satRoads = L.tileLayer(ESRI + 'Reference/World_Transportation/MapServer/tile/{z}/{y}/{x}', {maxZoom:19});
+const satNames = L.tileLayer(ESRI + 'Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}', {maxZoom:19});
+const sat = L.layerGroup([satImg, satRoads, satNames]);
 const streets = L.tileLayer(ESRI + 'World_Street_Map/MapServer/tile/{z}/{y}/{x}', {attribution:'Tiles &copy; Esri', maxZoom:19});
+const darkLabels = L.tileLayer(ESRI + 'Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}', {maxZoom:19, className:'dark-tiles'});
 // drawing order: GPS dots at the bottom, classifier-only above, HMM route on top
 map.createPane('gpsPane').style.zIndex = 410;
 map.createPane('clfPane').style.zIndex = 420;
 map.createPane('routePane').style.zIndex = 430;
 const gpsLayer = L.layerGroup().addTo(map), predLayer = L.layerGroup().addTo(map), clfLayer = L.layerGroup();
-L.control.layers({'Dark':dark, 'Satellite':sat, 'Streets':streets},
+L.control.layers({'Dark (detailed)':dark, 'Satellite + roads':sat, 'Streets (light)':streets},
   {'Place labels':darkLabels, 'Raw GPS':gpsLayer, 'Predicted route (classifier + HMM)':predLayer, 'Classifier-only (no HMM)':clfLayer},
   {collapsed:false}).addTo(map);
 const legend = L.control({position:'bottomleft'});
@@ -178,6 +184,9 @@ function draw(d) {
     L.polyline(l, {pane:'routePane', color:'#ff4d6d', weight:12, opacity:.18}).addTo(predLayer);   // glow
     L.polyline(l, {pane:'routePane', color:'#ff4d6d', weight:4.5, opacity:1}).addTo(predLayer);
   });
+  const se = (p, c, t) => L.marker(p, {pane:'routePane', title:t, icon:L.divIcon({className:'', iconSize:[20,20],
+    html:`<div class="se-marker" style="background:${c};box-shadow:0 0 10px ${c}"></div>`})}).bindTooltip(t).addTo(predLayer);
+  se(d.gps[0], '#34d399', 'Start'); se(d.gps[d.gps.length - 1], '#ff4d6d', 'End');
   map.fitBounds(L.latLngBounds(d.gps), {padding:[30,30]});
 }
 
