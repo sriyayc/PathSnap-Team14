@@ -4,6 +4,29 @@ Noisy GPS trajectories are matched to a road network. A trained classifier score
 road segments near each GPS fix, and an HMM / Viterbi decoder turns those scores into a connected route.
 The model is served by a FastAPI backend (Laptop 1) and an evaluator UI calls it (Laptop 2).
 
+## Quick start (demo)
+
+The trained model (`artifacts/models/lgbm_tuned.joblib`) and decoder settings (`artifacts/hmm_config.json`)
+are committed, so the demo needs **no training**.
+
+**Laptop 1 – API**
+1. `git clone https://github.com/sriyayc/PathSnap-Team14.git` and `cd PathSnap-Team14`
+2. `pip install -r requirements.txt`
+3. Put the trips to serve in `data/eval/<trip_id>/` (files `<trip_id>.track/.nodes/.arcs/.route`).
+   To rehearse without evaluator trips, unzip `Student folder.zip` and copy its `student_test` folder to
+   `data/student_test` (the API falls back to it when `data/eval` is empty).
+4. Double-click `run_api.bat` (or run `python -m uvicorn api.main:app --host 0.0.0.0 --port 8000`).
+   Note the IPv4 address it prints, and allow Python through the firewall on private networks.
+5. Check it from the same laptop: http://localhost:8000/health and http://localhost:8000/docs
+
+**Laptop 2 – UI** (only needs Python; no packages)
+1. Clone the repo (or copy just the `ui/` folder).
+2. Double-click `run_ui.bat` (or `cd ui` then `python -m http.server 8501`) and open http://localhost:8501
+3. Enter `http://<Laptop-1-IPv4>:8000` in the API box, press **Load trips**, and click a trip.
+
+If Laptop 2 cannot reach Laptop 1, check that both are on the same network (a phone hotspot works) and
+that `http://<Laptop-1-IPv4>:8000/health` opens in Laptop 2's browser.
+
 ## Repository layout
 
 | Path | Contents |

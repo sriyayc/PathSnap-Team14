@@ -36,6 +36,9 @@ def _data_dir():
         fallback = os.path.join(ROOT, "data", "student_test")
         log.warning("No trips in %s - falling back to %s", d, fallback)
         d = fallback
+    if not os.path.isdir(d):
+        log.error("Trip folder %s does not exist. Copy trip folders into data/eval/<trip_id>/ "
+                  "(or set PATHSNAP_DATA_DIR) and restart the API.", d)
     return d
 
 
@@ -52,6 +55,8 @@ class PredictRequest(BaseModel):
 
 
 def list_trips():
+    if not os.path.isdir(DATA_DIR):
+        return []
     return sorted(x for x in os.listdir(DATA_DIR) if os.path.isdir(os.path.join(DATA_DIR, x)))
 
 
