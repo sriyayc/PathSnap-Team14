@@ -48,9 +48,9 @@ class Predictor:
         if len(tab):
             best = tab.loc[tab.groupby("pt").p.idxmax()]
             clf_kept[best.pt.values] = best.arc.values
-        # every original observation inherits the prediction of the latest kept observation
         owner = np.searchsorted(keep, np.arange(len(trip.track)), side="right") - 1
-        hmm_all, clf_all = hmm_kept[owner], clf_kept[owner]
+        clf_all = clf_kept[owner]
+        hmm_all = interpolate_dropped(net, trip.xy, keep, hmm_kept)
         route = connect_route(net, hmm_kept)
         return trip, {
             "trip_id": trip.trip_id,
@@ -62,6 +62,41 @@ class Predictor:
             "timing_s": {"features": t1 - t0, "classifier": t2 - t1, "viterbi": t3 - t2, "total": time.perf_counter() - t0},
             "hmm_diagnostics": diag, "model": self.model_name, "hmm_config": asdict(self.hmm_cfg),
         }
+
+
+def interpolate_dropped(net, xy_all, keep, pred_kept):
+    """Assign an arc to every original observation. Kept observations use their Viterbi arc. An
+    observation removed by thinning, lying between kept observations k0 and k1, gets the closest arc on
+    the decoded path from pred[k0] to pred[k1] (both arcs plus the shortest connecting arcs), so
+    observations where the vehicle crosses onto the next road are not stuck on the previous one."""
+    from .network import point_segment
+    n = len(xy_all)
+    out = np.full(n, -1, dtype=np.int64)
+    out[keep] = pred_kept
+    for j in range(len(keep)):
+        lo = keep[j]
+        hi = keep[j + 1] if j + 1 < len(keep) else n
+        if hi - lo <= 1:
+            continue
+        a0 = int(pred_kept[j])
+        a1 = int(pred_kept[j + 1]) if j + 1 < len(keep) else a0
+        idx = np.arange(lo + 1, hi)
+        if a0 < 0:
+            out[idx] = a1
+            continue
+        if a1 < 0 or a1 == a0:
+            out[idx] = a0
+            continue
+        path = [a0]
+        if net.arcs[a0, 1] != net.arcs[a1, 0]:
+            gap = net.shortest_arc_path(int(net.arcs[a0, 1]), int(net.arcs[a1, 0]), limit=1000.0)
+            path += gap or []
+        path.append(a1)
+        path = np.asarray(path)
+        p = xy_all[idx]
+        d, _ = point_segment(p[:, :1], p[:, 1:2], net.ax[path][None], net.ay[path][None], net.bx[path][None], net.by[path][None])
+        out[idx] = path[d.argmin(1)]
+    return out
 
 
 def connect_route(net, arc_seq):

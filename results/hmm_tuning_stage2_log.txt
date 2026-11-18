@@ -1,0 +1,11 @@
+tuning trips: ['00000006', '00000008', '00000012', '00000018', '00000019', '00000033', '00000035', '00000042', '00000043', '00000045', '00000046', '00000054', '00000062', '00000066', '00000070', '00000075', '00000079', '00000080', '00000083', '00000086', '00000088', '00000093', '00000096', '00000099']
+{'beta': 15.0, 'emission_weight': 0.5, 'backward_factor': 1.0, 'backward_free_m': 0.0, 'hmm_top1': 0.9533602917462601, 'clf_top1': 0.9133692227542236, 'seconds': 32.038420199998654}
+{'beta': 15.0, 'emission_weight': 0.5, 'backward_factor': 1.0, 'backward_free_m': 5.0, 'hmm_top1': 0.9533602917462601, 'clf_top1': 0.9133692227542236, 'seconds': 38.93079239997314}
+{'beta': 15.0, 'emission_weight': 0.5, 'backward_factor': 1.0, 'backward_free_m': 10.0, 'hmm_top1': 0.9533602917462601, 'clf_top1': 0.9133692227542236, 'seconds': 597.6912859000149}
+{'beta': 15.0, 'emission_weight': 0.5, 'backward_factor': 3.0, 'backward_free_m': 0.0, 'hmm_top1': 0.9521446823290084, 'clf_top1': 0.9133692227542236, 'seconds': 35.752613899996504}
+{'beta': 15.0, 'emission_weight': 0.5, 'backward_factor': 3.0, 'backward_free_m': 5.0, 'hmm_top1': 0.9526656577935448, 'clf_top1': 0.9133692227542236, 'seconds': 38.16845540000941}
+{'beta': 15.0, 'emission_weight': 0.5, 'backward_factor': 3.0, 'backward_free_m': 10.0, 'hmm_top1': 0.9524423825944578, 'clf_top1': 0.9133692227542236, 'seconds': 38.359793300012825}
+{'beta': 15.0, 'emission_weight': 0.5, 'backward_factor': 6.0, 'backward_free_m': 0.0, 'hmm_top1': 0.9452231511573098, 'clf_top1': 0.9133692227542236, 'seconds': 37.647731500008376}
+{'beta': 15.0, 'emission_weight': 0.5, 'backward_factor': 6.0, 'backward_free_m': 5.0, 'hmm_top1': 0.9515244734426554, 'clf_top1': 0.9133692227542236, 'seconds': 37.086394300014945}
+{'beta': 15.0, 'emission_weight': 0.5, 'backward_factor': 6.0, 'backward_free_m': 10.0, 'hmm_top1': 0.9524175742390038, 'clf_top1': 0.9133692227542236, 'seconds': 37.610859300009906}
+best {'beta': 15.0, 'beta_per_s': 2.0, 'emission_weight': 0.5, 'unreachable_penalty': 40.0, 'max_route_factor': 4.0, 'route_slack': 300.0, 'gap_reset_s': 120.0, 'min_prob': 0.0001, 'backward_factor': 1.0, 'backward_free_m': 0.0} top1 0.9533602917462601

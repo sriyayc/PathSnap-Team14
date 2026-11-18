@@ -1,0 +1,13 @@
+2026-11-18 13:14:08,266  WARNING  No trips in C:\Users\Sriya\OneDrive\Desktop\ml\hackathon\pathsnap\data\eval - falling back to C:\Users\Sriya\OneDrive\Desktop\ml\hackathon\pathsnap\data\student_test
+2026-11-18 13:14:10,316  INFO  Loaded model=lgbm_tuned  hmm=HMMConfig(beta=15.0, beta_per_s=2.0, emission_weight=0.5, unreachable_penalty=40.0, max_route_factor=4.0, route_slack=300.0, gap_reset_s=120.0, min_prob=0.0001, backward_factor=1.0, backward_free_m=0.0)  data_dir=C:\Users\Sriya\OneDrive\Desktop\ml\hackathon\pathsnap\data\student_test
+INFO:     Started server process [7820]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
+INFO:     127.0.0.1:55555 - "GET /health HTTP/1.1" 200 OK
+2026-11-18 13:14:12,069  INFO  POST /predict trip_id=00000007  -> running pipeline
+2026-11-18 13:14:14,847  INFO  trip_id=00000007  obs=1354  decoded=1197  Top-1(HMM)=0.9948  Top-1(classifier)=0.9202  route-F1=0.9945  continuity=1.000  time=2.78s
+INFO:     127.0.0.1:55567 - "POST /predict HTTP/1.1" 200 OK
+2026-11-18 13:14:15,166  INFO  POST /predict trip_id=00000056  -> running pipeline
+2026-11-18 13:14:26,445  INFO  trip_id=00000056  obs=3958  decoded=3432  Top-1(HMM)=0.9705  Top-1(classifier)=0.9030  route-F1=0.9841  continuity=0.999  time=11.28s
+INFO:     127.0.0.1:55581 - "POST /predict HTTP/1.1" 200 OK

@@ -29,6 +29,7 @@ class HMMConfig:
     gap_reset_s: float = 120.0
     min_prob: float = 1e-4
     backward_factor: float = 3.0    # cost multiplier for backward movement along a directed arc
+    backward_free_m: float = 0.0    # backward movement up to this many metres is treated as GPS jitter (no extra cost)
 
 
 def viterbi(net, xy, ts, cand_arcs, cand_t, cand_p, cfg: HMMConfig = HMMConfig()):
@@ -38,6 +39,7 @@ def viterbi(net, xy, ts, cand_arcs, cand_t, cand_p, cfg: HMMConfig = HMMConfig()
     pred = np.full(n, -1, dtype=np.int64)
     diag = {"unreachable_steps": 0, "resets": 0}
     net.backward_factor = cfg.backward_factor
+    net.backward_free_m = cfg.backward_free_m
 
     def log_emis(p):
         p = np.clip(p, cfg.min_prob, 1.0)

@@ -96,4 +96,48 @@ for f in glob.glob(os.path.join(RES, "hmm_*_student_test.csv")):
     axs[1].set_xticks(x, h.trip.astype(str).str[-2:]); axs[1].set_ylim(0.5, 1.0)
     axs[1].set(title="Route continuity per trip", xlabel="trip"); axs[1].legend()
     fig.tight_layout(); fig.savefig(os.path.join(OUT, f"hmm_vs_clf_{tag}.png"), dpi=130)
+tvu = os.path.join(RES, "tuned_vs_untuned.csv")
+if os.path.exists(tvu):
+    t = pd.read_csv(tvu)
+    cols = [("cv_top1", "CV Top-1"), ("test_top1", "Student-test Top-1"), ("cv_f1_macro", "CV Macro F1"),
+            ("test_f1_macro", "Student-test Macro F1")]
+    fig, axs = plt.subplots(1, 3, figsize=(15, 4))
+    x = np.arange(len(cols)); w = 0.38
+    for i, (_, r) in enumerate(t.iterrows()):
+        axs[0].bar(x + (i - 0.5) * w, [r[c] for c, _ in cols], w, label=r.model)
+    axs[0].set_xticks(x, [n for _, n in cols], rotation=20); axs[0].set_ylim(0.85, 1.0); axs[0].legend()
+    axs[0].set_title("Tuned vs untuned LightGBM")
+    bar(axs[1], t.model.tolist(), t.test_log_loss.values, "Student-test log loss", "log loss")
+    bar(axs[2], t.model.tolist(), t.infer_us_per_row.values, "Inference time", "µs per row")
+    fig.tight_layout(); fig.savefig(os.path.join(OUT, "tuned_vs_untuned.png"), dpi=130)
+
+hmt = os.path.join(RES, "hmm_tuning.csv")
+if os.path.exists(hmt):
+    h = pd.read_csv(hmt)
+    fig, axs = plt.subplots(1, 3, figsize=(15, 4), sharey=True)
+    for ax, bf in zip(axs, sorted(h.backward_factor.unique())):
+        piv = h[h.backward_factor == bf].pivot(index="beta", columns="emission_weight", values="hmm_top1")
+        im = ax.imshow(piv.values, cmap="viridis", vmin=h.hmm_top1.min(), vmax=h.hmm_top1.max())
+        for (i, j), v in np.ndenumerate(piv.values):
+            ax.text(j, i, f"{v:.4f}", ha="center", va="center", color="white", fontsize=9)
+        ax.set_xticks(range(len(piv.columns)), piv.columns); ax.set_yticks(range(len(piv.index)), piv.index)
+        ax.set(title=f"backward_factor={bf}", xlabel="emission_weight", ylabel="beta (m)")
+    fig.suptitle(f"HMM Top-1 on 24 train trips (out-of-fold probabilities); classifier-only = {h.clf_top1.iloc[0]:.4f}")
+    fig.tight_layout(); fig.savefig(os.path.join(OUT, "hmm_tuning_grid.png"), dpi=130)
+
+fin = os.path.join(RES, "final_student_test.csv")
+if os.path.exists(fin):
+    h = pd.read_csv(fin)
+    x = np.arange(len(h)); w = 0.38
+    fig, axs = plt.subplots(1, 2, figsize=(14, 4))
+    axs[0].bar(x - w / 2, h.clf_top1_all, w, label="classifier only", color="#f39c12")
+    axs[0].bar(x + w / 2, h.hmm_top1_all, w, label="classifier + HMM", color="#d7301f")
+    axs[0].axhline(0.95, color="k", lw=0.8, ls="--")
+    axs[0].set_xticks(x, h.trip.astype(str).str[-2:]); axs[0].set_ylim(0.6, 1.0)
+    axs[0].set(title="Final pipeline: Top-1 on all GPS observations per student-test trip", xlabel="trip"); axs[0].legend()
+    axs[1].bar(x - w / 2, h.route_f1, w, label="route F1")
+    axs[1].bar(x + w / 2, h.route_continuity, w, label="route continuity")
+    axs[1].set_xticks(x, h.trip.astype(str).str[-2:]); axs[1].set_ylim(0.6, 1.02)
+    axs[1].set(title="Route-level quality of the HMM route", xlabel="trip"); axs[1].legend()
+    fig.tight_layout(); fig.savefig(os.path.join(OUT, "final_student_test.png"), dpi=130)
 print("plots written to", OUT)

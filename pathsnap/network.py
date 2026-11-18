@@ -58,6 +58,7 @@ class RoadNetwork:
         self._adj_order = order  # position in adjacency -> original arc id
         self._sp_cache: dict[int, tuple[float, dict[int, float]]] = {}
         self.backward_factor = 3.0
+        self.backward_free_m = 0.0
 
     # ------------------------------------------------------------------
     def candidates(self, xy: np.ndarray, radius: float, k: int):
@@ -113,7 +114,10 @@ class RoadNetwork:
             # the decoder sits on the wrong-direction twin. Small backward jitter is tolerated but costed
             # `backward_factor` times its length so wrong-direction paths are penalised.
             back = (ta - tb) * self.length[a]
-            return back * self.backward_factor if back < 30.0 else np.inf
+            if back >= 30.0:
+                return np.inf
+            free = min(back, self.backward_free_m)  # GPS jitter allowance
+            return free + (back - free) * self.backward_factor
         rest = (1 - ta) * self.length[a]
         d = self.dist_from(int(self.arcs[a, 1]), limit).get(int(self.arcs[b, 0]))
         if d is None or d > limit:

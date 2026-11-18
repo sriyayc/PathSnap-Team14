@@ -1,0 +1,29 @@
+tuning trips: ['00000006', '00000008', '00000012', '00000018', '00000019', '00000033', '00000035', '00000042', '00000043', '00000045', '00000046', '00000054', '00000062', '00000066', '00000070', '00000075', '00000079', '00000080', '00000083', '00000086', '00000088', '00000093', '00000096', '00000099']
+{'beta': 4.0, 'emission_weight': 0.5, 'backward_factor': 1.0, 'hmm_top1': 0.950358480736312, 'clf_top1': 0.9133692227542236, 'seconds': 47.198811300011585}
+{'beta': 4.0, 'emission_weight': 0.5, 'backward_factor': 3.0, 'hmm_top1': 0.9475551365699968, 'clf_top1': 0.9133692227542236, 'seconds': 44.773260600020876}
+{'beta': 4.0, 'emission_weight': 0.5, 'backward_factor': 6.0, 'hmm_top1': 0.9351013421320301, 'clf_top1': 0.9133692227542236, 'seconds': 37.96289429999888}
+{'beta': 4.0, 'emission_weight': 1.0, 'backward_factor': 1.0, 'hmm_top1': 0.9511027313999355, 'clf_top1': 0.9133692227542236, 'seconds': 29.765985700010788}
+{'beta': 4.0, 'emission_weight': 1.0, 'backward_factor': 3.0, 'hmm_top1': 0.9489444044754273, 'clf_top1': 0.9133692227542236, 'seconds': 37.9675714999903}
+{'beta': 4.0, 'emission_weight': 1.0, 'backward_factor': 6.0, 'hmm_top1': 0.9400630132228535, 'clf_top1': 0.9133692227542236, 'seconds': 26.97117010000511}
+{'beta': 4.0, 'emission_weight': 2.0, 'backward_factor': 1.0, 'hmm_top1': 0.9510283063335732, 'clf_top1': 0.9133692227542236, 'seconds': 35.54012590000639}
+{'beta': 4.0, 'emission_weight': 2.0, 'backward_factor': 3.0, 'hmm_top1': 0.9491180629636061, 'clf_top1': 0.9133692227542236, 'seconds': 32.7768456999911}
+{'beta': 4.0, 'emission_weight': 2.0, 'backward_factor': 6.0, 'hmm_top1': 0.9441067751618745, 'clf_top1': 0.9133692227542236, 'seconds': 36.70143829999142}
+{'beta': 8.0, 'emission_weight': 0.5, 'backward_factor': 1.0, 'hmm_top1': 0.9532114416135354, 'clf_top1': 0.9133692227542236, 'seconds': 30.134898099990096}
+{'beta': 8.0, 'emission_weight': 0.5, 'backward_factor': 3.0, 'hmm_top1': 0.949514996650872, 'clf_top1': 0.9133692227542236, 'seconds': 26.91990900001838}
+{'beta': 8.0, 'emission_weight': 0.5, 'backward_factor': 6.0, 'hmm_top1': 0.9422957652137239, 'clf_top1': 0.9133692227542236, 'seconds': 27.836651699995855}
+{'beta': 8.0, 'emission_weight': 1.0, 'backward_factor': 1.0, 'hmm_top1': 0.9511523481108437, 'clf_top1': 0.9133692227542236, 'seconds': 33.65592479999759}
+{'beta': 8.0, 'emission_weight': 1.0, 'backward_factor': 3.0, 'hmm_top1': 0.9505073308690367, 'clf_top1': 0.9133692227542236, 'seconds': 25.632804699998815}
+{'beta': 8.0, 'emission_weight': 1.0, 'backward_factor': 6.0, 'hmm_top1': 0.9444540921382322, 'clf_top1': 0.9133692227542236, 'seconds': 38.097792299988214}
+{'beta': 8.0, 'emission_weight': 2.0, 'backward_factor': 1.0, 'hmm_top1': 0.948448237366345, 'clf_top1': 0.9133692227542236, 'seconds': 38.29832830000669}
+{'beta': 8.0, 'emission_weight': 2.0, 'backward_factor': 3.0, 'hmm_top1': 0.9492172963854226, 'clf_top1': 0.9133692227542236, 'seconds': 33.0642107000167}
+{'beta': 8.0, 'emission_weight': 2.0, 'backward_factor': 6.0, 'hmm_top1': 0.9456200848445756, 'clf_top1': 0.9133692227542236, 'seconds': 36.398255500011146}
+{'beta': 15.0, 'emission_weight': 0.5, 'backward_factor': 1.0, 'hmm_top1': 0.9533602917462601, 'clf_top1': 0.9133692227542236, 'seconds': 30.603318099980243}
+{'beta': 15.0, 'emission_weight': 0.5, 'backward_factor': 3.0, 'hmm_top1': 0.9521446823290084, 'clf_top1': 0.9133692227542236, 'seconds': 33.99382409997634}
+{'beta': 15.0, 'emission_weight': 0.5, 'backward_factor': 6.0, 'hmm_top1': 0.9452231511573098, 'clf_top1': 0.9133692227542236, 'seconds': 33.042318100022385}
+{'beta': 15.0, 'emission_weight': 1.0, 'backward_factor': 1.0, 'hmm_top1': 0.9493909548736015, 'clf_top1': 0.9133692227542236, 'seconds': 32.88271609999356}
+{'beta': 15.0, 'emission_weight': 1.0, 'backward_factor': 3.0, 'hmm_top1': 0.9495894217172344, 'clf_top1': 0.9133692227542236, 'seconds': 35.46326479999698}
+{'beta': 15.0, 'emission_weight': 1.0, 'backward_factor': 6.0, 'hmm_top1': 0.9453471929345804, 'clf_top1': 0.9133692227542236, 'seconds': 38.17841779999435}
+{'beta': 15.0, 'emission_weight': 2.0, 'backward_factor': 1.0, 'hmm_top1': 0.9470837778163685, 'clf_top1': 0.9133692227542236, 'seconds': 38.36695360002341}
+{'beta': 15.0, 'emission_weight': 2.0, 'backward_factor': 3.0, 'hmm_top1': 0.9468108859063733, 'clf_top1': 0.9133692227542236, 'seconds': 29.7883985999797}
+{'beta': 15.0, 'emission_weight': 2.0, 'backward_factor': 6.0, 'hmm_top1': 0.9448262174700439, 'clf_top1': 0.9133692227542236, 'seconds': 25.779322999995202}
+best {'beta': 15.0, 'beta_per_s': 2.0, 'emission_weight': 0.5, 'unreachable_penalty': 40.0, 'max_route_factor': 4.0, 'route_slack': 300.0, 'gap_reset_s': 120.0, 'min_prob': 0.0001, 'backward_factor': 1.0} top1 0.9533602917462601

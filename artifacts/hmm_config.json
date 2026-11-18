@@ -1,0 +1,11 @@
+{
+  "beta": 15.0,
+  "beta_per_s": 2.0,
+  "emission_weight": 0.5,
+  "unreachable_penalty": 40.0,
+  "max_route_factor": 4.0,
+  "route_slack": 300.0,
+  "gap_reset_s": 120.0,
+  "min_prob": 0.0001,
+  "backward_factor": 1.0
+}

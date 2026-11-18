@@ -37,7 +37,10 @@ GRID = {
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--n_trips", type=int, default=24)
+    ap.add_argument("--grid", default=None, help="JSON dict overriding GRID")
+    ap.add_argument("--out", default="hmm_tuning.csv")
     args = ap.parse_args()
+    grid = json.loads(args.grid) if args.grid else GRID
     tab, pts = load_partition("train")
     oof = np.zeros(len(tab))
     for tri, vai in GroupKFold(5).split(tab, groups=tab.trip.values):
@@ -57,8 +60,8 @@ def main():
         prepared.append((tid, trip, net, trip.xy[keep], trip.track[keep, 2], tab[tab.trip == tid], tp.label_arc.values))
 
     rows = []
-    keys = list(GRID)
-    for combo in itertools.product(*[GRID[k] for k in keys]):
+    keys = list(grid)
+    for combo in itertools.product(*[grid[k] for k in keys]):
         cfg = HMMConfig(**dict(zip(keys, combo)))
         t0 = time.perf_counter()
         correct = total = 0
@@ -79,9 +82,10 @@ def main():
         rows.append(r)
         print(r, flush=True)
     df = pd.DataFrame(rows).sort_values("hmm_top1", ascending=False)
-    df.to_csv(os.path.join(ROOT, "results", "hmm_tuning.csv"), index=False)
+    df.to_csv(os.path.join(ROOT, "results", args.out), index=False)
     best = HMMConfig(**{k: float(df.iloc[0][k]) for k in keys})
-    json.dump(asdict(best), open(os.path.join(ROOT, "artifacts", "hmm_config.json"), "w"), indent=2)
+    if args.out == "hmm_tuning.csv":
+        json.dump(asdict(best), open(os.path.join(ROOT, "artifacts", "hmm_config.json"), "w"), indent=2)
     print("best", asdict(best), "top1", df.iloc[0].hmm_top1)
 
 

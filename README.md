@@ -17,7 +17,15 @@ The model is served by a FastAPI backend (Laptop 1) and an evaluator UI calls it
 | `scripts/01_eda.py` | Dataset inventory, data-quality report, EDA plots, Folium maps |
 | `scripts/02_build_dataset.py` | Builds the candidate/feature tables for the train and student_test partitions |
 | `scripts/03_train_models.py` | Trains and compares 5 classifiers: Logistic Regression, KNN, Random Forest, LightGBM, MLP (grouped 5-fold CV + student_test) |
+| `scripts/04_optuna.py` | Bayesian (Optuna TPE) tuning of LightGBM |
+| `scripts/05b_tune_hmm.py` | Tunes HMM parameters on out-of-fold train predictions |
 | `scripts/05_hmm_eval.py` | Compares classifier-only vs classifier+HMM |
+| `scripts/07_final_eval_and_maps.py` | Runs the deployed pipeline on student_test and writes prediction maps |
+| `pathsnap/pipeline.py` | End-to-end inference used by the API (reference route never loaded) |
+| `pathsnap/viz.py` | Folium map helpers |
+| `api/main.py` | FastAPI backend |
+| `ui/index.html` | Evaluator UI (Leaflet) |
+| `report/REPORT_DRAFT.md` | Report draft with all results |
 | `scripts/06_plots.py` | Comparison plots from the saved results |
 | `results/` | CSV/JSON experiment outputs, logs, plots |
 | `maps/` | Folium HTML maps |
@@ -41,6 +49,45 @@ python scripts/06_plots.py            # plots -> results/plots
 python scripts/05_hmm_eval.py --model lgbm --part student_test
 ```
 All random seeds are fixed (`SEED = 42`).
+
+## Full pipeline (in order)
+
+```bash
+python scripts/01_eda.py                 # EDA, data-quality report, Folium maps
+python scripts/02_build_dataset.py       # candidates + features + labels -> data/processed
+python scripts/03_train_models.py        # 5-model comparison (grouped CV + student_test)
+python scripts/04_optuna.py              # Bayesian (TPE) tuning of LightGBM -> artifacts/models/lgbm_tuned.joblib
+python scripts/05b_tune_hmm.py           # HMM decoder parameters on out-of-fold train predictions -> artifacts/hmm_config.json
+python scripts/05_hmm_eval.py --model lgbm_tuned --hmm_config artifacts/hmm_config.json   # classifier vs HMM
+python scripts/07_final_eval_and_maps.py # deployed pipeline on student_test + prediction maps
+python scripts/06_plots.py               # all charts
+```
+
+## Deployment (two laptops on the same network)
+
+**Laptop 1 – Model & API**
+```bash
+pip install -r requirements.txt
+# put the evaluation trips in data/eval/<trip_id>/<trip_id>.{track,nodes,arcs,route}
+#   (or set PATHSNAP_DATA_DIR to their folder; with no data/eval it serves data/student_test)
+python -m uvicorn api.main:app --host 0.0.0.0 --port 8000
+ipconfig        # note this laptop's IPv4 address, e.g. 192.168.1.20
+```
+Allow Python through the Windows firewall on private networks when prompted. The terminal prints
+one log line per request with the trip id, accuracy and timing. Show these logs to the evaluator.
+
+**Laptop 2 – Evaluator UI**
+```bash
+cd ui
+python -m http.server 8501
+```
+Open `http://localhost:8501`, enter `http://<laptop-1-IP>:8000` in the API box and press **Load trips**.
+Click a trip to run it. The UI shows the GPS points, the predicted route, the classifier-only route
+(which can be toggled) and the accuracy computed by the server.
+
+API endpoints: `GET /health`, `GET /trips`, `POST /predict {"trip_id": "..."}`. Interactive docs are at `/docs`.
+The reference route is read only inside `score_against_reference()` on the server. The response contains
+metrics, never reference labels or geometry.
 
 ## Method summary
 
@@ -70,6 +117,13 @@ All random seeds are fixed (`SEED = 42`).
    - Emissions are the classifier probabilities.
    - Transitions follow Newson–Krumm: |network distance − great-circle distance| / β, with β widened for time gaps.
    - A gap of more than 120 s restarts the chain.
+
+## Results (student_test, 10 trips)
+
+| | Top-1 on decoded obs (trip mean) | Top-1 on all obs (trip mean) | Route F1 | Route continuity |
+|---|---|---|---|---|
+| Classifier only (tuned LightGBM) | 0.920 | 0.889 | — | 0.940 |
+| **Classifier + HMM/Viterbi** | **0.956** | **0.944** | **0.990** | **0.999** |
 
 ## Data partitions and leakage rules
 - Train (80 trips): fitting, grouped CV and hyperparameter search.
