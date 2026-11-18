@@ -16,7 +16,7 @@ The model is served by a FastAPI backend (Laptop 1) and an evaluator UI calls it
 | `pathsnap/hmm.py` | HMM / Viterbi decoder |
 | `scripts/01_eda.py` | Dataset inventory, data-quality report, EDA plots, Folium maps |
 | `scripts/02_build_dataset.py` | Builds the candidate/feature tables for the train and student_test partitions |
-| `scripts/03_train_models.py` | Trains and compares 8 classifiers (grouped 5-fold CV + student_test) |
+| `scripts/03_train_models.py` | Trains and compares 5 classifiers: Logistic Regression, KNN, Random Forest, LightGBM, MLP (grouped 5-fold CV + student_test) |
 | `scripts/05_hmm_eval.py` | Compares classifier-only vs classifier+HMM |
 | `scripts/06_plots.py` | Comparison plots from the saved results |
 | `results/` | CSV/JSON experiment outputs, logs, plots |

@@ -6,3 +6,38 @@ train rows 918003 (pos rate 0.146) from 80 trips; student_test rows 105283
   fold 2: F1m 0.9577 top1 0.9368 logloss 0.0522 fit 65.2s
   fold 3: F1m 0.9772 top1 0.9691 logloss 0.0344 fit 78.3s
   fold 4: F1m 0.9148 top1 0.8638 logloss 0.1147 fit 61.1s
+  TEST: F1m 0.9469 top1 0.9142 logloss 0.0676 continuity 0.9354 infer 6.25us/row
+
+=== extratrees (Bagging ensemble) : 200 trees, min_samples_leaf=5, 400k-row subsample
+  fold 0: F1m 0.9400 top1 0.9026 logloss 0.0710 fit 19.4s
+  fold 1: F1m 0.9203 top1 0.8765 logloss 0.1013 fit 21.8s
+  fold 2: F1m 0.9520 top1 0.9338 logloss 0.0585 fit 26.2s
+  fold 3: F1m 0.9732 top1 0.9639 logloss 0.0419 fit 25.1s
+  fold 4: F1m 0.9120 top1 0.8597 logloss 0.1174 fit 29.6s
+  TEST: F1m 0.9423 top1 0.9089 logloss 0.0728 continuity 0.9298 infer 6.97us/row
+
+=== knn (Instance-based) : StandardScaler + KNN k=25 distance-weighted, 80k-row subsample
+  fold 0: F1m 0.9308 top1 0.8946 logloss 0.1124 fit 0.1s
+  fold 1: F1m 0.9081 top1 0.8656 logloss 0.1677 fit 0.1s
+  fold 2: F1m 0.9424 top1 0.9237 logloss 0.0881 fit 0.1s
+  fold 3: F1m 0.9605 top1 0.9546 logloss 0.0726 fit 0.1s
+  fold 4: F1m 0.8980 top1 0.8490 logloss 0.1996 fit 0.1s
+  TEST: F1m 0.9325 top1 0.8996 logloss 0.1152 continuity 0.9280 infer 86.07us/row
+
+=== mlp (Neural network) : StandardScaler + MLP(64,32) relu adam early-stopping, 400k-row subsample
+  fold 0: F1m 0.9385 top1 0.9029 logloss 0.0719 fit 66.8s
+  fold 1: F1m 0.9228 top1 0.8786 logloss 0.1020 fit 94.7s
+  fold 2: F1m 0.9535 top1 0.9338 logloss 0.0575 fit 56.4s
+  fold 3: F1m 0.9735 top1 0.9644 logloss 0.0402 fit 53.4s
+  fold 4: F1m 0.9102 top1 0.8600 logloss 0.1234 fit 93.5s
+  TEST: F1m 0.9417 top1 0.9085 logloss 0.0724 continuity 0.9364 infer 1.04us/row
+
+      model  cv_f1_macro  cv_top1  test_f1_macro  test_top1  test_log_loss  test_route_continuity  infer_us_per_row
+      lgbm       0.9444   0.9120         0.9479     0.9179         0.0657                 0.9373            4.2854
+    logreg       0.9213   0.8970         0.9243     0.8972         0.1084                 0.9228            0.4692
+       gnb       0.8546   0.8817         0.8424     0.8817         0.7496                 0.9250            1.0207
+     dtree       0.9403   0.9075         0.9449     0.9125         0.0750                 0.9323            0.4460
+        rf       0.9440   0.9115         0.9469     0.9142         0.0676                 0.9354            6.2484
+extratrees       0.9395   0.9073         0.9423     0.9089         0.0728                 0.9298            6.9701
+       knn       0.9279   0.8975         0.9325     0.8996         0.1152                 0.9280           86.0662
+       mlp       0.9397   0.9079         0.9417     0.9085         0.0724                 0.9364            1.0389

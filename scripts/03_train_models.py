@@ -21,15 +21,13 @@ import pandas as pd
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, ROOT)
 from lightgbm import LGBMClassifier  # noqa: E402
-from sklearn.ensemble import ExtraTreesClassifier, RandomForestClassifier  # noqa: E402
+from sklearn.ensemble import RandomForestClassifier  # noqa: E402
 from sklearn.linear_model import LogisticRegression  # noqa: E402
 from sklearn.model_selection import GroupKFold  # noqa: E402
-from sklearn.naive_bayes import GaussianNB  # noqa: E402
 from sklearn.neighbors import KNeighborsClassifier  # noqa: E402
 from sklearn.neural_network import MLPClassifier  # noqa: E402
 from sklearn.pipeline import make_pipeline  # noqa: E402
 from sklearn.preprocessing import StandardScaler  # noqa: E402
-from sklearn.tree import DecisionTreeClassifier  # noqa: E402
 
 from pathsnap.experiment import SEED, evaluate, labeled, load_arcs, load_partition  # noqa: E402
 from pathsnap.features import FEATURES  # noqa: E402
@@ -38,15 +36,10 @@ from pathsnap.features import FEATURES  # noqa: E402
 MODELS = {
     "logreg": ("Linear", lambda: make_pipeline(StandardScaler(), LogisticRegression(C=1.0, max_iter=2000)),
                None, "StandardScaler + L2 LogisticRegression C=1"),
-    "gnb": ("Probabilistic", lambda: GaussianNB(), None, "GaussianNB var_smoothing=1e-9"),
     "knn": ("Instance-based", lambda: make_pipeline(StandardScaler(), KNeighborsClassifier(n_neighbors=25, weights="distance", n_jobs=-1)),
             80_000, "StandardScaler + KNN k=25 distance-weighted, 80k-row subsample"),
-    "dtree": ("Tree", lambda: DecisionTreeClassifier(max_depth=12, min_samples_leaf=50, random_state=SEED),
-              None, "max_depth=12 min_samples_leaf=50"),
     "rf": ("Bagging ensemble", lambda: RandomForestClassifier(n_estimators=200, min_samples_leaf=5, max_features="sqrt", n_jobs=-1, random_state=SEED),
            400_000, "200 trees, min_samples_leaf=5, sqrt features, 400k-row subsample"),
-    "extratrees": ("Bagging ensemble", lambda: ExtraTreesClassifier(n_estimators=200, min_samples_leaf=5, n_jobs=-1, random_state=SEED),
-                   400_000, "200 trees, min_samples_leaf=5, 400k-row subsample"),
     "lgbm": ("Boosting", lambda: LGBMClassifier(n_estimators=400, learning_rate=0.05, num_leaves=31, subsample=0.8, subsample_freq=1,
                                                colsample_bytree=0.8, random_state=SEED, verbose=-1, n_jobs=-1),
              None, "400 trees lr=0.05 num_leaves=31 subsample=0.8 colsample=0.8"),
