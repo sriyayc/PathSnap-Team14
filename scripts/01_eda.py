@@ -71,10 +71,12 @@ def folium_map(part, tid, path):
     trip = load_trip(os.path.join(ROOT, "data", part, tid))
     c = [trip.track[:, 1].mean(), trip.track[:, 0].mean()]
     m = folium.Map(location=c, zoom_start=14, tiles="OpenStreetMap")
-    lo, hi = trip.xy.min(0) - 150, trip.xy.max(0) + 150
-    ax = trip.node_xy[trip.arcs[:, 0]]
-    near = np.flatnonzero(((ax >= lo) & (ax <= hi)).all(1))[:15000]
-    net = folium.FeatureGroup("Road network (nearby arcs)")
+    # road arcs whose midpoint lies within 100 m of any GPS fix
+    from scipy.spatial import cKDTree
+    mid = (trip.node_xy[trip.arcs[:, 0]] + trip.node_xy[trip.arcs[:, 1]]) / 2
+    dmid, _ = cKDTree(trip.xy).query(mid, distance_upper_bound=100)
+    near = np.flatnonzero(np.isfinite(dmid))
+    net = folium.FeatureGroup("Road network (arcs within 100 m of GPS)")
     for a in near:
         u, v = trip.arcs[a]
         folium.PolyLine([[trip.nodes[u, 1], trip.nodes[u, 0]], [trip.nodes[v, 1], trip.nodes[v, 0]]],
@@ -89,6 +91,17 @@ def folium_map(part, tid, path):
     for lon, lat, t in trip.track[:: max(1, len(trip.track) // 1500)]:
         folium.CircleMarker([lat, lon], radius=2, color="blue", fill=True, opacity=0.7, tooltip=f"t={t:.0f}s").add_to(gps)
     gps.add_to(m)
+    se = folium.FeatureGroup("Start / end")
+    folium.Marker([trip.track[0, 1], trip.track[0, 0]], tooltip="GPS start", icon=folium.Icon(color="green", icon="play")).add_to(se)
+    folium.Marker([trip.track[-1, 1], trip.track[-1, 0]], tooltip="GPS end", icon=folium.Icon(color="red", icon="stop")).add_to(se)
+    se.add_to(m)
+    legend = (f'<div style="position:fixed;bottom:30px;left:30px;z-index:9999;background:white;padding:8px 12px;'
+              f'border:1px solid #888;border-radius:6px;font-size:13px">'
+              f'<b>Trip {tid} ({part})</b><br>'
+              f'<span style="color:blue">&#9679;</span> Raw GPS observations<br>'
+              f'<span style="color:green">&#9644;</span> Reference route<br>'
+              f'<span style="color:#9a9a9a">&#9644;</span> Road network (nearby)</div>')
+    m.get_root().html.add_child(folium.Element(legend))
     folium.LayerControl(collapsed=False).add_to(m)
     m.fit_bounds([[trip.track[:, 1].min(), trip.track[:, 0].min()], [trip.track[:, 1].max(), trip.track[:, 0].max()]])
     m.save(path)
@@ -97,9 +110,15 @@ def folium_map(part, tid, path):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--map", nargs="*", default=["00000001", "00000033"])
+    ap.add_argument("--maps-only", action="store_true")
     args = ap.parse_args()
     os.makedirs(OUT, exist_ok=True)
     os.makedirs(os.path.join(ROOT, "maps"), exist_ok=True)
+    if args.maps_only:
+        for tid in args.map:
+            part = "train" if os.path.isdir(os.path.join(ROOT, "data", "train", tid)) else "student_test"
+            folium_map(part, tid, os.path.join(ROOT, "maps", f"eda_trip_{tid}.html"))
+        return
     rows, dts, steps = [], [], []
     for part in ["train", "student_test"]:
         for tid in list_trips(os.path.join(ROOT, "data", part)):
